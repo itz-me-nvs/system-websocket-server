@@ -1,0 +1,126 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+    <style>
+        /* Reset some default browser styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+        h1 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        #output {
+            width: 100%;
+            max-width: 500px;
+            background-color: #ffffff;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>WebSocket Laptop Status</h1>
+
+    <button onclick="sendStatusRequest()">Get Laptop Status</button>
+
+    <pre id="output">Waiting for data...</pre>
+
+    <script>
+        const ws = new WebSocket('ws://192.168.1.10:8080');
+
+        ws.onopen = () => {
+            console.log('Connected to WebSocket server');
+        };
+
+/*************  ✨ Windsurf Command ⭐  *************/
+/**
+ * Handles incoming WebSocket messages. Parses the message data 
+ * and updates the page content with the laptop's status information 
+ * such as battery level and system time when a "STATUS" message is received.
+ * Logs an error if the message format is invalid.
+ *
+ * @param {MessageEvent} message - The message event containing data from the WebSocket.
+ */
+
+/*******  5355899c-dcd4-4cec-b578-4e17203782e7  *******/        ws.onmessage = (message) => {
+            try {
+                const { type, payload } = JSON.parse(message?.data);
+                if (type === "STATUS") {
+                    const { batteryLevel, systemTime } = payload;
+                    document.getElementById('output').textContent = 
+                        `🔋 Battery Level: ${batteryLevel}%\n🕒 System Time: ${new Date(systemTime?.current).toLocaleString()}`;
+                }
+            } catch (error) {
+                console.error('Invalid message format:', error);
+            }
+        };
+
+        ws.onclose = () => {
+            console.log('Disconnected from WebSocket server');
+        };
+
+        function sendStatusRequest() {
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: "GET_STATUS" }));
+            } else {
+                alert('WebSocket connection is not open.');
+            }
+        }
+    </script>
+</body>
+
+</html>
