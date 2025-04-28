@@ -1,6 +1,7 @@
 // server.js
 const WebSocket = require('ws');
 const si = require("systeminformation")
+const loudness = require("loudness");
 
 // Create WebSocket server
 const wss = new WebSocket.Server({ port: 8080 });
@@ -9,7 +10,8 @@ wss.on('connection', (ws) => {
     console.log('New client connected.');
 
     ws.on('message', (message) => {
-
+        console.log("message", message);
+        
         handleRequest(message, ws)
 
     });
@@ -38,8 +40,28 @@ async function handleRequest(message, ws){
     switch (type) {
         case "GET_STATUS":
             const systemInfo = await getSystemInfo();
-            ws.send(JSON.stringify({type: "STATUS", payload: systemInfo}));            
+            ws.send(JSON.stringify({type: "GET_STATUS", payload: systemInfo}));            
             break;
+
+        case 'VOLUME_UP':
+            {
+                let vol = await loudness.getVolume();
+            console.log("vol", vol);
+            
+            vol = Math.min(vol + 10, 100)
+            await loudness.setVolume(vol);
+            ws.send(JSON.stringify({type: 'VOLUME_CONTROL', payload: vol}));
+            break;
+            }
+
+            case 'VOLUME_DOWN':
+                let vol = await loudness.getVolume();
+                console.log("vol", vol);
+                
+                vol = Math.max(vol - 10, 0)
+                await loudness.setVolume(vol);
+                ws.send(JSON.stringify({type: 'VOLUME_CONTROL', payload: vol}));
+                break;    
     
         default:
             break;

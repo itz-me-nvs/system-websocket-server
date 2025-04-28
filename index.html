@@ -54,7 +54,7 @@
             background-color: #ffffff;
             padding: 1rem;
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             white-space: pre-wrap;
             word-wrap: break-word;
             overflow-wrap: break-word;
@@ -76,6 +76,15 @@
     <h1>WebSocket Laptop Status</h1>
 
     <button onclick="sendStatusRequest()">Get Laptop Status</button>
+   <div>
+    <h3 id="currentVolume">
+
+    </h3>
+    <div style="display: flex;align-items: center;gap: 10px;">
+        <button onclick="volumeUpController(1)">Volume Up </button>
+        <button onclick="volumeUpController(2)">Volume Down</button>
+       </div>
+   </div>
 
     <pre id="output">Waiting for data...</pre>
 
@@ -86,24 +95,23 @@
             console.log('Connected to WebSocket server');
         };
 
-/*************  ✨ Windsurf Command ⭐  *************/
-/**
- * Handles incoming WebSocket messages. Parses the message data 
- * and updates the page content with the laptop's status information 
- * such as battery level and system time when a "STATUS" message is received.
- * Logs an error if the message format is invalid.
- *
- * @param {MessageEvent} message - The message event containing data from the WebSocket.
- */
 
-/*******  5355899c-dcd4-4cec-b578-4e17203782e7  *******/        ws.onmessage = (message) => {
+        ws.onmessage = (message) => {
             try {
                 const { type, payload } = JSON.parse(message?.data);
-                if (type === "STATUS") {
-                    const { batteryLevel, systemTime } = payload;
-                    document.getElementById('output').textContent = 
-                        `🔋 Battery Level: ${batteryLevel}%\n🕒 System Time: ${new Date(systemTime?.current).toLocaleString()}`;
+
+                switch (type) {
+                    case "GET_STATUS":
+                        document.getElementById('output').textContent =
+                            `🔋 Battery Level: ${batteryLevel}%\n🕒 System Time: ${new Date(systemTime?.current).toLocaleString()}`;
+                        break;
+                    case 'VOLUME_CONTROL':
+                        document.querySelector('#currentVolume').textContent = `${payload}%`;
+                        break;
+                    default:
+                        break;
                 }
+
             } catch (error) {
                 console.error('Invalid message format:', error);
             }
@@ -116,6 +124,21 @@
         function sendStatusRequest() {
             if (ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({ type: "GET_STATUS" }));
+            } else {
+                alert('WebSocket connection is not open.');
+            }
+        }
+
+
+        function volumeUpController(volumeType) {
+            if (ws.readyState === WebSocket.OPEN) {
+                if (volumeType == 1) {
+                    ws.send(JSON.stringify({ type: "VOLUME_UP" }));
+                }
+                else {
+                    ws.send(JSON.stringify({ type: "VOLUME_DOWN" }));
+
+                }
             } else {
                 alert('WebSocket connection is not open.');
             }
