@@ -84,6 +84,16 @@
         <button onclick="volumeUpController(1)">Volume Up </button>
         <button onclick="volumeUpController(2)">Volume Down</button>
        </div>
+
+    <button onclick="lockScreen()">
+        Lock the screen
+    </button>  
+    
+    <h3>
+        Brightness Controller
+    </h3>
+
+    <input id="brightness" type="range" min="30" max="100" value="70" onchange="brightnessHandler(event)" />
    </div>
 
     <pre id="output">Waiting for data...</pre>
@@ -100,13 +110,24 @@
             try {
                 const { type, payload } = JSON.parse(message?.data);
 
+                const output = document.getElementById('output');
+                const currentVolume = document.getElementById('currentVolume');
+                const brightness = document.querySelector('#brightness');
+
+
+                console.log("payload", payload);
+                
+
                 switch (type) {
-                    case "GET_STATUS":
-                        document.getElementById('output').textContent =
-                            `🔋 Battery Level: ${batteryLevel}%\n🕒 System Time: ${new Date(systemTime?.current).toLocaleString()}`;
+                    case "GET_STATUS": {
+                        output.textContent =
+                            `🔋 Battery Level: ${payload?.batteryLevel}%\n🕒 System Time: ${new Date(payload?.systemTime?.current).toLocaleString()} \n Brightness: ${payload?.currentBrightness}`;
+
+                            brightness.value = (payload?.currentBrightness * 100) || 50
+                    }
                         break;
                     case 'VOLUME_CONTROL':
-                        document.querySelector('#currentVolume').textContent = `${payload}%`;
+                    currentVolume.textContent = `${payload}%`;
                         break;
                     default:
                         break;
@@ -142,6 +163,25 @@
             } else {
                 alert('WebSocket connection is not open.');
             }
+        }
+
+
+        function lockScreen() {
+            if(ws.readyState === WebSocket.OPEN){
+                ws.send(JSON.stringify({type: "LOCK_SCREEN"}))
+            }
+            else {
+                alert('WebSocket connection is not open.');
+
+            }
+        }
+
+        function brightnessHandler(e) {
+            const value = event.target.value;
+            console.log("changes", value);
+
+            ws.send(JSON.stringify({type: "BRIGHTNESS_CONTROL", payload: value}))
+            
         }
     </script>
 </body>
