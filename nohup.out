@@ -1,0 +1,20 @@
+[33m[nodemon] 3.1.10[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node server.js`[39m
+✅ WebSocket Server is running on ws://localhost:8080
+[32mServing "/home/navas/Documents/Projects/NodeJS/system-websocket-server" at http://127.0.0.1:5500[39m
+[36mReady for changes[39m
+[36mChange detected[39m /home/navas/Documents/Projects/NodeJS/system-websocket-server/nohup.out
+New client connected.
+[36mChange detected[39m /home/navas/Documents/Projects/NodeJS/system-websocket-server/nohup.out
+message <Buffer 7b 22 74 79 70 65 22 3a 22 4c 4f 43 4b 5f 53 43 52 45 45 4e 22 7d>
+payload LOCK_SCREEN :undefined
+[36mChange detected[39m /home/navas/Documents/Projects/NodeJS/system-websocket-server/nohup.out
+success 
+[36mChange detected[39m /home/navas/Documents/Projects/NodeJS/system-websocket-server/nohup.out
+New client connected.
+[36mChange detected[39m /home/navas/Documents/Projects/NodeJS/system-websocket-server/nohup.out
+New client connected.
+[36mChange detected[39m /home/navas/Documents/Projects/NodeJS/system-websocket-server/nohup.out

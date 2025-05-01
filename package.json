@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "loudness": "^0.4.2",
+    "node-cron": "^3.0.3",
     "systeminformation": "^5.25.11",
     "ws": "^8.18.1"
   }

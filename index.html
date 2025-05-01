@@ -1,189 +1,277 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Test</title>
-    <style>
-        /* Reset some default browser styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Laptop WebSocket Controller</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        body {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            background-color: #f5f7fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #333;
-            font-size: 1.5rem;
-        }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      padding: 2rem;
+      color: #2c3e50;
+    }
 
-        h1 {
-            margin-bottom: 1rem;
-            color: #2c3e50;
-            text-align: center;
-        }
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: #1e3a5f;
+    }
 
-        button {
-            background-color: #3498db;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-bottom: 1.5rem;
-        }
+    .status-bar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      color: #34495e;
+    }
 
-        button:hover {
-            background-color: #2980b9;
-        }
+    .status-bar i {
+      font-size: 1.2rem;
+      color: #2c3e50;
+    }
 
-        #output {
-            width: 100%;
-            max-width: 500px;
-            background-color: #ffffff;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
+    .dashboard {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
 
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 1.5rem;
-            }
+    .card {
+      background: #ffffff;
+      padding: 1.2rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      flex: 1 1 280px;
+      max-width: 300px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
 
-            button {
-                width: 100%;
-            }
-        }
-    </style>
+    h3 {
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+      color: #34495e;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 0.6rem 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    input[type="range"],
+    input[type="file"] {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+
+    .icon {
+      font-size: 1.1rem;
+    }
+
+    p#uploadMessage {
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .status-bar {
+        justify-content: center;
+        margin-bottom: 1.5rem;
+      }
+    }
+  </style>
 </head>
-
 <body>
-    <h1>WebSocket Laptop Status</h1>
 
-    <button onclick="sendStatusRequest()">Get Laptop Status</button>
-   <div>
-    <h3 id="currentVolume">
+<!-- Status Bar -->
+<div class="status-bar">
+  <i class="fas fa-wifi"></i>
+  <i class="fas fa-bluetooth-b"></i>
+  <span id="currentTime"></span>
+</div>
 
-    </h3>
-    <div style="display: flex;align-items: center;gap: 10px;">
-        <button onclick="volumeUpController(1)">Volume Up </button>
-        <button onclick="volumeUpController(2)">Volume Down</button>
-       </div>
+<h1><i class="fas fa-laptop-code icon"></i> Laptop Controller Dashboard</h1>
 
-    <button onclick="lockScreen()">
-        Lock the screen
-    </button>  
-    
-    <h3>
-        Brightness Controller
-    </h3>
+<div class="dashboard">
 
-    <input id="brightness" type="range" min="30" max="100" value="70" onchange="brightnessHandler(event)" />
-   </div>
+  <!-- Volume Control Card -->
+  <div class="card">
+    <h3><i class="fas fa-volume-up icon"></i> Volume Control</h3>
+    <p id="currentVolume">Current Volume: -</p>
+    <div class="button-group">
+      <button onclick="requestHandler('VOLUME_UP', 1)">
+        <i class="fas fa-volume-up"></i> Up
+      </button>
+      <button onclick="requestHandler('VOLUME_UP', 2)">
+        <i class="fas fa-volume-down"></i> Down
+      </button>
+    </div>
+  </div>
 
-    <pre id="output">Waiting for data...</pre>
+  <!-- Lock Screen Card -->
+  <div class="card">
+    <h3><i class="fas fa-lock icon"></i> Lock</h3>
+    <button onclick="requestHandler('LOCK_SCREEN')">
+      <i class="fas fa-lock"></i> Lock Screen
+    </button>
+  </div>
 
-    <script>
-        const ws = new WebSocket('ws://192.168.1.10:8080');
+  <!-- Brightness Control Card -->
+  <div class="card">
+    <h3><i class="fas fa-sun icon"></i> Brightness</h3>
+    <input id="brightness" type="range" min="30" max="100" value="70" onchange="requestHandler('BRIGHTNESS_CONTROL', event)" />
+  </div>
 
-        ws.onopen = () => {
-            console.log('Connected to WebSocket server');
-        };
+  <!-- File Upload Card -->
+  <div class="card">
+    <h3><i class="fas fa-file-upload icon"></i> Upload</h3>
+    <input type="file" id="fileUpload" onchange="requestHandler('FILE_TRANSFER', event)" />
+    <p id="uploadMessage"></p>
+  </div>
 
+</div>
 
-        ws.onmessage = (message) => {
-            try {
-                const { type, payload } = JSON.parse(message?.data);
+<script>
+  const ws = new WebSocket('ws://192.168.1.10:8080');
 
-                const output = document.getElementById('output');
-                const currentVolume = document.getElementById('currentVolume');
-                const brightness = document.querySelector('#brightness');
+  ws.onopen = () => console.log('Connected to WebSocket server');
+  ws.onclose = () => console.log('Disconnected from WebSocket server');
 
+  ws.onmessage = (message) => {
+    try {
+      console.log("message", message, "results", message?.data);
 
-                console.log("payload", payload);
-                
+      if(message?.data == 'connected'){
+        return
+      }
+      
+      const { type, payload } = JSON.parse(message?.data);
+      const currentVolume = document.getElementById('currentVolume');
+      const brightness = document.querySelector('#brightness');
+      const uploadMessage = document.querySelector('#uploadMessage');
 
-                switch (type) {
-                    case "GET_STATUS": {
-                        output.textContent =
-                            `🔋 Battery Level: ${payload?.batteryLevel}%\n🕒 System Time: ${new Date(payload?.systemTime?.current).toLocaleString()} \n Brightness: ${payload?.currentBrightness}`;
-
-                            brightness.value = (payload?.currentBrightness * 100) || 50
-                    }
-                        break;
-                    case 'VOLUME_CONTROL':
-                    currentVolume.textContent = `${payload}%`;
-                        break;
-                    default:
-                        break;
-                }
-
-            } catch (error) {
-                console.error('Invalid message format:', error);
-            }
-        };
-
-        ws.onclose = () => {
-            console.log('Disconnected from WebSocket server');
-        };
-
-        function sendStatusRequest() {
-            if (ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({ type: "GET_STATUS" }));
-            } else {
-                alert('WebSocket connection is not open.');
-            }
-        }
-
-
-        function volumeUpController(volumeType) {
-            if (ws.readyState === WebSocket.OPEN) {
-                if (volumeType == 1) {
-                    ws.send(JSON.stringify({ type: "VOLUME_UP" }));
-                }
-                else {
-                    ws.send(JSON.stringify({ type: "VOLUME_DOWN" }));
-
-                }
-            } else {
-                alert('WebSocket connection is not open.');
-            }
-        }
+      switch (type) {
+        case "GET_STATUS":
+          brightness.value = (payload?.currentBrightness * 100) || 50;
+          break;
+        case "VOLUME_CONTROL":
+          currentVolume.textContent = `Current Volume: ${payload}%`;
+          break;
+        case "FILE_TRANSFER":
+          uploadMessage.textContent = payload;
+          break;
+      }
+    } catch (err) {
+      console.error('WebSocket message error:', err);
+    }
+  };
 
 
-        function lockScreen() {
-            if(ws.readyState === WebSocket.OPEN){
-                ws.send(JSON.stringify({type: "LOCK_SCREEN"}))
-            }
-            else {
-                alert('WebSocket connection is not open.');
+  function requestHandler(type, payload) {
+        if (ws.readyState === WebSocket.OPEN) {
+             switch (type) {
+        case "VOLUME_UP":
+                  ws.send(JSON.stringify({ type: payload === 1 ? "VOLUME_UP" : "VOLUME_DOWN" }));
 
-            }
-        }
+            break;
 
-        function brightnessHandler(e) {
-            const value = event.target.value;
-            console.log("changes", value);
+        case "LOCK_SCREEN":
+            ws.send(JSON.stringify({ type: "LOCK_SCREEN" }));
 
-            ws.send(JSON.stringify({type: "BRIGHTNESS_CONTROL", payload: value}))
+            break;
             
-        }
-    </script>
-</body>
+        case "BRIGHTNESS_CONTROL":
+            ws.send(JSON.stringify({ type: "BRIGHTNESS_CONTROL", payload: payload.target.value }));  
+            
+            break;
 
+        case "FILE_TRANSFER":
+            {
+                  const file = payload.target.files[0];
+    const uploadMessage = document.getElementById('uploadMessage');
+    uploadMessage.textContent = "Uploading...";
+
+    if (!file || file.size > 5 * 1024 * 1024) {
+      alert("Select a file smaller than 5MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = {
+        type: "FILE_TRANSFER",
+        payload: {
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          content: e.target.result
+        }
+      };
+      ws.send(JSON.stringify(data));
+    };
+    reader.readAsDataURL(file);
+
+            break;
+            }    
+    
+        default:
+            break;
+    }
+        }
+        else {
+            console.log('WebSocket is not open');
+        }
+   
+  }
+
+
+  // Update time every second
+  function updateTime() {
+    const timeEl = document.getElementById('currentTime');
+    const now = new Date();
+    timeEl.textContent = now.toLocaleTimeString();
+  }
+
+  setInterval(updateTime, 1000);
+  updateTime();
+</script>
+
+</body>
 </html>
